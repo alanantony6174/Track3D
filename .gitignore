@@ -1,0 +1,3 @@
+*.pyc
+yolo11n.pt
+tracker/__pycache__

@@ -6,8 +6,8 @@ from typing import Any
 
 import numpy as np
 
-from ..utils import LOGGER
-from ..utils.ops import xywh2ltwh
+from ultralytics.utils import LOGGER
+from ultralytics.utils.ops import xywh2ltwh
 from .basetrack import BaseTrack, TrackState
 from .utils import matching
 from .utils.kalman_filter import KalmanFilterXYAH
