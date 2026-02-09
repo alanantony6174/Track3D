@@ -77,23 +77,31 @@ class TrackerNode(Node):
             if r.boxes:
                 # r.boxes.xywh returns tensor: [[x_c, y_c, w, h], ...]
                 boxes = r.boxes.xywh.cpu().numpy()
-                self._draw_center_points(annotated_frame, boxes)
+                masks = r.masks if r.masks is not None else None
+                self._draw_center_points(annotated_frame, boxes, masks)
 
             cv2.imshow("ROS2 Tracker", annotated_frame)
             
         # Wait for 1ms to display the window
         cv2.waitKey(1)
 
-    def _draw_center_points(self, frame, boxes):
+    def _draw_center_points(self, frame, boxes, masks=None):
         """Calculate and draw center points on the frame."""
-        for box in boxes:
+        for i, box in enumerate(boxes):
             x_c, y_c, w, h = box
-            # Offset center point a little up based on parameter
-            center_point = (int(x_c), int(y_c - h * self.center_offset))
-            
-            # Draw a circle at the center point
+            center_point = (int(x_c), int(y_c))
+
+            if masks is not None and len(masks) > i:
+                contour = masks.xy[i].astype(int)
+                moments = cv2.moments(contour)
+                if moments['m00'] != 0:
+                    cx = int(moments['m10'] / moments['m00'])
+                    cy = int(moments['m01'] / moments['m00'])
+                    
+                    if cv2.pointPolygonTest(contour, (cx, cy), False) >= 0:
+                        center_point = (cx, cy)
+
             cv2.circle(frame, center_point, 5, (0, 0, 255), -1)
-            # Optional: Put text text
             cv2.putText(frame, f"Center: {center_point}", (center_point[0] + 10, center_point[1]), 
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 
