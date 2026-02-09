@@ -1,3 +1,4 @@
 *.pyc
 yolo11n.pt
 tracker/__pycache__
+yolo11n-seg.pt
