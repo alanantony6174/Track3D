@@ -1,0 +1,27 @@
+# BoT-SORT 3D Tracker Configuration
+# All distance thresholds are in normalized range [0, 1] where 1.0 ≈ 2m in 3D space
+
+# --- Detection Filtering ---
+track_high_thresh: 0.5    # Min confidence for first-pass association
+track_low_thresh: 0.1     # Min confidence for second-pass (low-conf recovery)
+new_track_thresh: 0.6     # Min confidence to initialize a new track
+
+# --- Association ---
+match_thresh: 0.4          # First-pass matching threshold (normalized; 0.4 ≈ 0.8m)
+second_match_thresh: 0.25  # Second-pass threshold (low-conf detections; 0.25 ≈ 0.5m)
+unconfirmed_thresh: 0.35   # Third-pass threshold (unconfirmed tracks; 0.35 ≈ 0.7m)
+
+# --- Track Lifecycle ---
+track_buffer: 10           # Frames to keep lost track before removal
+
+# --- ReID / Appearance ---
+with_reid: true            # Enable appearance embedding for anti-swap
+proximity_thresh: 0.5      # Don't use appearance if position cost > this
+appearance_thresh: 0.25    # Reject appearance match if embedding dist > this
+model: "auto"              # ReID model ("auto" = YOLO native features)
+
+# --- Legacy (required by parent class but unused in 3D) ---
+fuse_score: false
+aspect_ratio_thresh: 1.6
+min_box_area: 10
+gmc_method: "sparseOptFlow"
