@@ -154,14 +154,17 @@ class BOTSORT_3D(BOTSORT):
         if len(tl) == 0 or len(dl) == 0:
             return np.zeros((len(tl), len(dl)))
             
-        dists = euclidean_distance_3d(np.array(tl), np.array(dl))
-        
-        # Normalize 3D distance to [0, 1] range for fusion with appearance
-        # Distances > 2m are almost certainly different people
-        dists_norm = np.minimum(dists / 2.0, 1.0)
+        # Compute 3D IoU similarity [0, 1]
+        # Invert to cost [0, 1] (1 = no overlap, 0 = full overlap)
+        iou_sim = iou_3d(np.array(tl), np.array(dl))
+        dists_norm = 1.0 - iou_sim
         
         # Gate: tracks too far apart can't be the same person
-        dists_mask = dists_norm > (1 - self.proximity_thresh)
+        # Proximity thresh is now IoU based. 
+        # If proximity_thresh is 0.5 (from config), we gate if IoU < (1-0.5) = 0.5?
+        # No, config comment says: "Don't use appearance if position cost > this"
+        # If cost > 0.5 => IoU < 0.5. So we filter out low overlaps.
+        dists_mask = dists_norm > self.proximity_thresh
         
         # Fuse with ReID embeddings if available
         if self.args.with_reid and self.encoder is not None:
@@ -346,12 +349,13 @@ class BOTSORT_3D(BOTSORT):
         if len(stracksa) == 0 or len(stracksb) == 0:
             return stracksa, stracksb
             
-        # Compute pairwise 3D distances
+        # Compute pairwise 3D IoU
         bboxes_a = np.array([t.bbox3d for t in stracksa])
         bboxes_b = np.array([t.bbox3d for t in stracksb])
-        dists = euclidean_distance_3d(bboxes_a, bboxes_b)
+        ious = iou_3d(bboxes_a, bboxes_b)
         
-        pairs = np.where(dists < 0.3)  # Within 30cm
+        # If IoU > 0.5, consider them duplicates
+        pairs = np.where(ious > 0.5)
         
         dupa, dupb = [], []
         for p, q in zip(*pairs):

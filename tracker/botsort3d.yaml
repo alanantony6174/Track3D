@@ -17,7 +17,7 @@ track_buffer: 10           # Frames to keep lost track before removal
 # --- ReID / Appearance ---
 with_reid: true            # Enable appearance embedding for anti-swap
 proximity_thresh: 0.5      # Don't use appearance if position cost > this
-appearance_thresh: 0.25    # Reject appearance match if embedding dist > this
+appearance_thresh: 0.40    # Reject appearance match if embedding dist > this
 model: "auto"              # ReID model ("auto" = YOLO native features)
 
 # --- Legacy (required by parent class but unused in 3D) ---

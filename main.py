@@ -25,6 +25,7 @@ class TrackerNode(Node):
 
         self.get_logger().info(f"Loading YOLO model: {self.model_path}")
         self.model = YOLO(self.model_path)
+        self.model.to('cpu') 
         
         # Load 3D Tracker config from YAML
         config_path = os.path.join(os.path.dirname(__file__), 'tracker', 'botsort3d.yaml')
@@ -75,7 +76,8 @@ class TrackerNode(Node):
                 show=False, 
                 stream=False,
                 classes=[0],
-                verbose=False
+                verbose=False,
+                device='cpu'
             )
             
             # Prepare 3D Detections for Tracker
